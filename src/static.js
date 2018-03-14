@@ -8,16 +8,16 @@ let regImg = /\.(jpg|png|gif)$/;
 exports.static = function (res ,pathname) {
   let basePath = path.resolve(__dirname, '../client');
   if (pathname === '/' || pathname === '/index.html') {
-    responseHtml(res, pathname, basePath)
+    responseHtml(res, pathname, basePath);
     return;
   }
 
   if (regJs.test(pathname)) {
-    responseJs(res, pathname)
+    responseJs(res, pathname);
     return
   }
   if (regCss.test(pathname)) {
-    responseCss(res, pathname)
+    responseCss(res, pathname);
     return
   }
   if (regImg.test(pathname)) {
@@ -78,7 +78,14 @@ let responseImage = function (res, pathName) {
     const imgType = path.extname(pathName).replace('.', '')
     imageData += data;
     res.writeHead(200, {'Content-type': `image/${ imgType }` })
-    fs.createReadStream(imageName).pipe(res);
+    
+    const imgStream = fs.createReadStream(imageName);
+    imgStream.on('data', function (data) {
+      res.write(data)
+    })
+    imgStream.on('end', function () {
+      res.end()
+    })
   })
 }
 let errMsg = function (res, err) {
